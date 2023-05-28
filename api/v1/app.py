@@ -13,11 +13,14 @@ app.register_blueprint(app_views, url_prefix='/api/v1')
 
 @app.teardown_appcontext
 def teardown_appcontext(exception):
+    """
+    Closes the database connection at the end of the request
+    """
     storage.close()
 
 if __name__ == "__main__":
     host = os.getenv('HBNB_API_HOST')
-    port = os.getenv('HBNB_API_PORT')
+    port = int(os.getenv('HBNB_API_PORT'))
     if host is None:
         host = '0.0.0.0'
     if port is None:
