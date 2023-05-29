@@ -3,14 +3,15 @@
 This script initializes the blueprint for API views.
 """
 
-from api.v1.views.index import *
-from api.v1.views.places_amenities import *
-from api.v1.views.states import *
-from api.v1.views.cities import *
-from api.v1.views.amenities import *
-from api.v1.views.users import *
-from api.v1.views.places import *
+
 from api.v1.views.places_reviews import *
+from api.v1.views.places import *
+from api.v1.views.users import *
+from api.v1.views.amenities import *
+from api.v1.views.cities import *
+from api.v1.views.states import *
+from api.v1.views.places_amenities import *
+from api.v1.views.index import *
 from flask import Blueprint
 from models.state import State
 from models.amenity import Amenity
@@ -89,3 +90,26 @@ def put(data):
         return jsonify(found.to_dict()), 200
     else:
         abort(404)
+
+
+@cities.route('/cities/<city_id>', methods=['PUT'])
+def update_city(city_id):
+    city = storage.get(City, city_id)
+    if not city:
+        abort(404)
+
+    if not request.is_json:
+        abort(400, description='Not a JSON')
+
+    data = request.get_json()
+
+    # Remove ignored keys
+    ignored_keys = ['id', 'state_id', 'created_at', 'updated_at']
+    data = {k: v for k, v in data.items() if k not in ignored_keys}
+
+    for key, value in data.items():
+        setattr(city, key, value)
+
+    storage.save()
+
+    return jsonify(city.to_dict()), 200
