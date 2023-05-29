@@ -7,26 +7,19 @@ from api.v1.views import app_views
 from flask import jsonify
 from models import storage
 
-@app_views.route('/status', strict_slashes=False)
-def get_status():
-    """
-    Returns the status of the API.
-    """
-    return jsonify({'status': 'OK'})
 
-
-@app_views.route('/stats', strict_slashes=False)
+@app_views.route('/stats', methods=['GET'], strict_slashes=False)
 def get_stats():
-    """
-    Returns the stats of the API
-    """
-    stats = {
-        'amenities': storage.count('Amenity'),
-        'cities': storage.count('City'),
-        'places': storage.count('Place'),
-        'reviews': storage.count('Review'),
-        'states': storage.count('State'),
-        'users': storage.count('User')
+    classes = {
+        'amenities': 'Amenity',
+        'cities': 'City',
+        'places': 'Place',
+        'reviews': 'Review',
+        'states': 'State',
+        'users': 'User'
     }
-
+    stats = {}
+    for key, value in classes.items():
+        count = storage.count(value)
+        stats[key] = count
     return jsonify(stats)
