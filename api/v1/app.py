@@ -21,8 +21,9 @@ def teardown_appcontext(exception):
     storage.close()
 
 
+# Handler for 404 errors
 @app.errorhandler(404)
-def not_found(error):
+def handle_404_error(error):
     """
     Handler for 404 errors
     """
@@ -31,6 +32,7 @@ def not_found(error):
     return response
 
 
+# Run the Flask server
 if __name__ == "__main__":
     host = os.getenv('HBNB_API_HOST')
     port = int(os.getenv('HBNB_API_PORT'))
@@ -38,4 +40,4 @@ if __name__ == "__main__":
         host = '0.0.0.0'
     if port is None:
         port = 5000
-    app.run(host=host, port=port)
+    app.run(host='0.0.0.0', port=5000)
