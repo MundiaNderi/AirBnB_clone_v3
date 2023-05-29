@@ -3,7 +3,6 @@
 Script that creates a route on the API
 """
 
-
 from api.v1.views import app_views
 from flask import jsonify
 from models import storage
@@ -19,8 +18,6 @@ def get_stats():
         'states': 'State',
         'users': 'User'
     }
-
-
     stats = {}
     for key, value in classes.items():
         count = storage.count(value)
