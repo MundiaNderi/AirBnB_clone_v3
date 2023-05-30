@@ -89,6 +89,7 @@ class FileStorage:
         if cls is None:
             return len(self.all())
         else:
+            cls_name = cls.__name__
             c = classes[cls]
             if c is None or cls is None:
                 return len(self.all())
