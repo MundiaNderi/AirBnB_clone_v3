@@ -12,8 +12,13 @@ from models.review import Review
 from models.state import State
 from models.user import User
 
-classes = {"Amenity": Amenity, "BaseModel": BaseModel, "City": City,
-           "Place": Place, "Review": Review, "State": State, "User": User}
+classes = {"Amenity": Amenity,
+           "BaseModel": BaseModel,
+           "City": City,
+           "Place": Place,
+           "Review": Review,
+           "State": State,
+           "User": User}
 
 
 class FileStorage:
@@ -71,6 +76,8 @@ class FileStorage:
 
     def get(self, cls, id):
         """ retrieves one object """
+        cls.name = cls.__name__
+        c = classes.get(cls_name)
         c = classes[cls]
         if c is None:
             return None
@@ -84,6 +91,8 @@ class FileStorage:
         if cls is None:
             return len(self.all())
         else:
-            c = classes[cls]
+            cls_name = cls.__name__
+            c = classes.get[cls_name]
             if c is None or cls is None:
                 return len(self.all())
+            return sum(1 for obj in self.all(c))

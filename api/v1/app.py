@@ -4,15 +4,9 @@ This script creates a Flask application instance with a blueprint
 for API endpoints.
 
 It initializes the Flask app, sets up CORS (Cross-Origin Resource Sharing),
-and registers the blueprint for the API endpoints. It also defines error
-handlers and a teardown function to close the database connection after
-each request.
+and registers the blueprint for the API endpoints.
 
 Usage: python3 <script_name>.py
-
-Environment variables:
-    - HBNB_API_HOST: The host IP to bind the Flask server (default: '0.0.0.0')
-    - HBNB_API_PORT: The port to run the Flask server (default: 5000)
 """
 
 from flask import Flask, jsonify, make_response
