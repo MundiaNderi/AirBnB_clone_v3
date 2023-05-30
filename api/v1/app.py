@@ -15,7 +15,7 @@ Environment variables:
     - HBNB_API_PORT: The port to run the Flask server (default: 5000)
 """
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, make_response
 from flask_cors import CORS
 from models import storage
 from api.v1.views import app_views
@@ -23,9 +23,9 @@ import os
 from os import getenv
 
 app = Flask(__name__)
-app.register_blueprint(app_views, url_prefix='/api/v1')
-app.url_map.strict_slashes = False
-cors = CORS(app, resources={"*": {"origins": "0.0.0.0"}})
+app.register_blueprint(app_views)
+CORS(app, resources={"*": {"origins": "0.0.0.0"}})
+app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 
 
 @app.teardown_appcontext
@@ -52,14 +52,13 @@ def handle_404_error(error):
         Response: A Flask JSON response indicating that the requested
         resource was not found.
     """
-    response = jsonify({'error': 'Not found'})
-    response.status_code = 404
-    return response
+    response = {"error": "Not found"}
+    return make_response(jsonify(response), 404)
 
 
 if __name__ == "__main__":
-    host = os.getenv('HBNB_API_HOST')
-    port = int(os.getenv('HBNB_API_PORT'))
+    host = getenv('HBNB_API_HOST')
+    port = getenv('HBNB_API_PORT'))
     if host is None:
         host = '0.0.0.0'
     if port is None:
