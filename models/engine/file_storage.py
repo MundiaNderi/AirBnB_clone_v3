@@ -76,6 +76,8 @@ class FileStorage:
 
     def get(self, cls, id):
         """ retrieves one object """
+        cls.name = cls.__name__
+        c = classes.get(cls_name)
         c = classes[cls]
         if c is None:
             return None
