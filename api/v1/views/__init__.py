@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """
-    This script initializes the blueprint for API views.
-    """
+This script initializes the blueprint for API views.
+"""
 
 from api.v1.views.places_amenities import *
 from api.v1.views.places_reviews import *
