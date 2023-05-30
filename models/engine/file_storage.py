@@ -90,6 +90,7 @@ class FileStorage:
             return len(self.all())
         else:
             cls_name = cls.__name__
-            c = classes[cls]
+            c = classes.get[cls_name]
             if c is None or cls is None:
                 return len(self.all())
+            return sum(1 for obj in self.all(c))
