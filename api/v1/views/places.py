@@ -1,103 +1,88 @@
 #!/usr/bin/python3
+""" handles all default RestFul API actions """
 
-'''
-Create a new view for City objects that handles
-all default RestFul API actions.
-'''
 
 from api.v1.views import app_views
-from flask import jsonify, request, abort
-from api.v1.views import get, delete, post, put
+from flask import jsonify, make_response, abort, request
+from models.city import City
+from models.user import User
+from models.place import Place
 from models import storage
-import os
 
 
-@app_views.route('/places/<place_id>',
-                 strict_slashes=False,
-                 methods=['GET', 'DELETE', 'PUT'])
-@app_views.route('/cities/<city_id>/places',
-                 strict_slashes=False,
-                 methods=['GET', 'POST'])
-def place_crud(city_id=None, place_id=None):
-    '''Returns GET, DELETE, PUT, POST methods'''
-    data = {
-        'str': 'Place',
-        '_id': place_id,
-        'p_id': city_id,
-        'p_prop': 'city_id',
-        'p_child': 'places',
-        'p_str': 'City',
-        'check': ['user_id', 'name'],
-        'ignore': ['created_at', 'updated_at', 'id', 'user_id', 'city_id']}
-    methods = {
-        'GET': get,
-        'DELETE': delete,
-        'POST': post,
-        'PUT': put
-    }
-    if request.method in methods:
-        return methods[request.method](data)
+@app_views.route('/cities/<city_id>/places', methods=["GET"],
+                 strict_slashes=False)
+def place_view(city_id):
+    """ return a jsonified place objects """
+    get_id = storage.get(City, city_id)
+    if get_id is None:
+        abort(404)
+    place_dict = storage.all(Place)
+    place_list = []
+    for value in place_dict.values():
+        if value.city_id == city_id:
+            place_list.append(value.to_dict())
+    return (jsonify(place_list))
 
 
-@app_views.route('/places_search',
-                 strict_slashes=False,
-                 methods=['POST'])
-def search_crud():
-    ''' Filters places by state, city, and amenities '''
-    req = request.get_json()
-    if req is None:
-        return jsonify({'error': 'Not a JSON'}), 400
-    places = storage.all("Place").values()
-    if req == {}:
-        return jsonify([x.to_dict() for x in places]), 200
-    state_list = check_and_get(req, 'states', 'State')
-    city_list = populate(state_list, 'cities') |\
-        check_and_get(req, 'cities', 'City')
-    place_list = populate(city_list, 'places') if len(city_list) else places
-    if not req.get('amenities') or len(req['amenities']) == 0:
-        return jsonify([x.to_dict() for x in place_list]), 200
-    amenity_list = check_and_get(req, 'amenities', 'Amenity', True)
-    return filter_results(place_list, amenity_list)
+@app_views.route('/places/<place_id>', methods=["GET"], strict_slashes=False)
+def places_id_view(place_id):
+    """ returns a jsonified place obj by place_id """
+    get_id = storage.get(Place, place_id)
+    if get_id is None:
+        abort(404)
+    return (jsonify(get_id.to_dict()))
 
 
-def check_and_get(req, cls_str, cls, id_only=False):
-    ''' Checks db for class according to list of id's '''
-    _set = set()
-    cls_array = req.get(cls_str)
-    if cls_array:
-        for _id in cls_array:
-            found = storage.get(cls, _id)
-            if id_only:
-                _set.add(found.id)
-            elif found:
-                _set.add(found)
-    return _set
+@app_views.route('/places/<place_id>', methods=["DELETE"],
+                 strict_slashes=False)
+def delete_place(place_id):
+    """ delete place obj by place_id """
+    get_id = storage.get(Place, place_id)
+    if get_id is None:
+        abort(404)
+    storage.delete(get_id)
+    storage.save()
+    return (jsonify({}), 200)
 
 
-def populate(parent_list, child_prop):
-    ''' Populate subclasses of a parent list of classes'''
-    _set = set()
-    for p in parent_list:
-        for child in getattr(p, child_prop):
-            _set.add(child)
-    return _set
+@app_views.route('/cities/<city_id>/places', methods=["POST"],
+                 strict_slashes=False)
+def create_place(city_id):
+    """ creating a place object """
+    get_id = storage.get(City, city_id)
+    if get_id is None:
+        abort(404)
+    data_req = request.get_json()
+    if not data_req:
+        return (make_response(jsonify({'error': 'Not a JSON'}), 400))
+    if "user_id" not in data_req.keys():
+        return (make_response(jsonify({'error': 'Missing user_id'}), 400))
+    userId = storage.get(User, data_req["user_id"])
+    if userId is None:
+        abort(404)
+    if "name" not in data_req.keys():
+        return (make_response(jsonify({'error': 'Missing name'}), 400))
+    data_req["city_id"] = city_id
+    new_place_obj = Place(**data_req)
+    new_place_obj.save()
+    return (jsonify(new_place_obj.to_dict()), 201)
+
+# @app_views.route('/places_search', methods="POST"])
 
 
-def filter_results(place_list, amenity_list):
-    ''' Filter results of place list with specified amenities '''
-    filtered = []
-    for place in place_list:
-        required_amens = [a.id for a in place.amenities]
-        if required_amens and all([x in required_amens for x in amenity_list]):
-            filtered.append(place)
-    return jsonify([x for x in remove_subclass(filtered, 'amenities')]), 200
-
-
-def remove_subclass(_list, subclass):
-    ''' Remove subclasses for serialization '''
-    res = []
-    for _ in _list:
-        d = _.to_dict()
-        del d[subclass]
-        res.append(d)
-    return res
+@app_views.route('/places/<place_id>', methods=["PUT"], strict_slashes=False)
+def update_place(place_id):
+    """ updating a place object """
+    get_id = storage.get(Place, place_id)
+    if get_id is None:
+        abort(404)
+    data_req = request.get_json()
+    if not data_req:
+        return (make_response(jsonify({'error': 'Not a JSON'}), 400))
+    for key, value in data_req.items():
+        ignore_keys = ["id", "created_at", "updated_at", "city_id", "user_id"]
+        if key not in ignore_keys:
+            setattr(get_id, key, value)
+    get_id.save()
+    return (jsonify(get_id.to_dict()), 200)
