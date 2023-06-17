@@ -1,13 +1,5 @@
 #!/usr/bin/python3
-"""
-This script creates a Flask application instance with a blueprint
-for API endpoints.
-
-It initializes the Flask app, sets up CORS (Cross-Origin Resource Sharing),
-and registers the blueprint for the API endpoints.
-
-Usage: python3 <script_name>.py
-"""
+""" Setting up API """
 
 from flask import Flask, jsonify, make_response
 from flask_cors import CORS
@@ -52,9 +44,9 @@ def handle_404_error(error):
 
 if __name__ == "__main__":
     host = getenv('HBNB_API_HOST')
-    port = getenv('HBNB_API_PORT'))
+    port = getenv('HBNB_API_PORT')
     if host is None:
-        host='0.0.0.0'
+        host = '0.0.0.0'
     if port is None:
-        port=5000
-    app.run(host = host, port = port, threaded = True)
+        port = 5000
+    app.run(host=host, port=port)
