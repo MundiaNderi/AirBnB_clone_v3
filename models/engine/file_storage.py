@@ -12,13 +12,8 @@ from models.review import Review
 from models.state import State
 from models.user import User
 
-classes = {"Amenity": Amenity,
-           "BaseModel": BaseModel,
-           "City": City,
-           "Place": Place,
-           "Review": Review,
-           "State": State,
-           "User": User}
+classes = {"Amenity": Amenity, "BaseModel": BaseModel, "City": City,
+           "Place": Place, "Review": Review, "State": State, "User": User}
 
 
 class FileStorage:
@@ -70,29 +65,23 @@ class FileStorage:
             if key in self.__objects:
                 del self.__objects[key]
 
+    def get(self, cls, id):
+        """ get method: returns the object based on the class and its ID or
+            None if not found """
+        obj_dict = self.all(cls)
+        for key, value in obj_dict.items():
+            obj_str = cls.__name__ + '.' + id
+            if key == obj_str:
+                return (value)
+        return (None)
+
+    def count(self, cls=None):
+        """ count method: Returns the number of objects in storage matching
+            the given class. If no class is passed, returns the count of all
+            objects in storage. """
+        obj_num = self.all(cls)
+        return (len(obj_num))
+
     def close(self):
         """call reload() method for deserializing the JSON file to objects"""
         self.reload()
-
-    def get(self, cls, id):
-        """ retrieves one object """
-        cls.name = cls.__name__
-        c = classes.get(cls_name)
-        c = classes[cls]
-        if c is None:
-            return None
-        for v in self.all(c).values():
-            if v.id == id:
-                return v
-        return None
-
-    def count(self, cls=None):
-        """ count number of objects in storage """
-        if cls is None:
-            return len(self.all())
-        else:
-            cls_name = cls.__name__
-            c = classes.get[cls_name]
-            if c is None or cls is None:
-                return len(self.all())
-            return sum(1 for obj in self.all(c))

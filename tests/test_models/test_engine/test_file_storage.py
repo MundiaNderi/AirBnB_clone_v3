@@ -14,7 +14,6 @@ from models.place import Place
 from models.review import Review
 from models.state import State
 from models.user import User
-from models import storage
 import json
 import os
 import pep8
@@ -117,19 +116,20 @@ class TestFileStorage(unittest.TestCase):
 
     @unittest.skipIf(models.storage_t == 'db', "not testing file storage")
     def test_get(self):
-        """ Test that get method works """
-        s = State(name='TEST')
-        storage.new(s)
-        storage.save()
-        found = storage.get("State", s.id)
-        self.assertTrue(found)
+        """ testing the get method in file storage """
+        obj_dict = models.storage.all(State)
+        for item in obj_dict.values():
+            object_id = item.id
+            obj = models.storage.get(State, object_id)
+        self.assertIsInstance(obj, State)
+        self.assertEqual(object_id, obj.id)
 
     @unittest.skipIf(models.storage_t == 'db', "not testing file storage")
     def test_count(self):
-        """ Test that count method works """
-        count = storage.count()
-        s = State(name='TEST2')
-        storage.new(s)
-        storage.save()
-        new_count = storage.count()
-        self.assertNotEqual(count, new_count)
+        """ testing the count method in file storage """
+        state_count = models.storage.count(State)
+        state_obj = models.storage.all(State)
+        obj_count = models.storage.count()
+        obj = models.storage.all()
+        self.assertEqual(len(state_obj), state_count)
+        self.assertEqual(len(obj), obj_count)
